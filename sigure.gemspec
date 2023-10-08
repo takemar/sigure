@@ -1,4 +1,4 @@
-require_relative 'lig/sigure/version'
+require_relative 'lib/sigure/version'
 
 Gem::Specification.new do |s|
   s.name = 'sigure'
@@ -15,4 +15,5 @@ Gem::Specification.new do |s|
     'source_code_uri' => 'https://github.com/takemar/sigure',
   }
   # s.required_ruby_version = '>= 3.2.2'
+  s.add_runtime_dependency 'starry', '~> 0.1.0'
 end

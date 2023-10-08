@@ -1,0 +1,19 @@
+PATH
+  remote: .
+  specs:
+    sigure (0.1.0)
+      starry (~> 0.1.0)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    starry (0.1.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  sigure!
+
+BUNDLED WITH
+   2.4.10
