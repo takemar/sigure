@@ -1,31 +1,29 @@
-class Sigure::Component
+class Sigure::Component < Starry::Item
 
   SF_FIELDS = {}
 
-  def initialize(obj)
-    @item = (
-      case obj
-      in Starry::Item
-        obj
-      in [name, parameters]
-        Starry::Item.new(name, parameters)
-      in String | Symbol
-        Starry::Item.new(obj)
-      else
-        raise
-      end
-    )
+  def initialize(obj, parameters = {})
+    case obj
+    in Starry::Item
+      super(obj.value, obj.parameters)
+    in [name, p]
+      super(name, p)
+    in String | Symbol
+      super(obj, parameters)
+    else
+      raise
+    end
 
-    case name = @item.value
+    case value
     when String
-      unless name.match?(/\A[!#$%&'*+\-.^_`|~0-9A-Za-z]*\z/)
+      unless value.match?(/\A[!#$%&'*+\-.^_`|~0-9A-Za-z]*\z/)
         raise
       end
-      @item.value = @name = name.downcase
+      self.value = @name = value.downcase
       @derived_component = false
     when Symbol
-      @item.value = name.to_s
-      @name = name
+      @name = value
+      self.value = value.to_s
       @derived_component = true
     else
       raise
@@ -35,13 +33,13 @@ class Sigure::Component
   end
 
   private def initialize_parameters
-    p = @item.parameters.transform_keys(&:to_sym).each do |key, value|
-      case key
+    p = parameters.transform_keys(&:to_sym).each do |k, v|
+      case k
       when :sf, :bs, :req, :tr
-        [key, boolean_parameter(key, value)]
-      when :key
-        raise unless value.kind_of?(String)
-        [key, value]
+        [k, boolean_parameter(v)]
+      when :k
+        raise unless v.kind_of?(String)
+        [k, v]
       else
         raise
       end
@@ -61,11 +59,11 @@ class Sigure::Component
     if p[:bs] || p[:tr]
       raise # TODO: Not implemented yet
     end
-    @item.parameters = p
+    self.parameters = p
   end
 
-  private def boolean_parameter(key, value)
-    case value
+  private def boolean_parameter(v)
+    case v
     when true
       true
     when false
@@ -75,13 +73,7 @@ class Sigure::Component
     end
   end
 
-  def identifier
-    @item.to_s
-  end
-
-  def parameters
-    @item.parameters
-  end
+  alias identifier to_s
 
   def derived_component?
     @derived_component
@@ -99,21 +91,21 @@ class Sigure::Component
     if parameters[:req]
       message = message[:@req]
     end
-    value = message[@name]
+    v = message[value]
     if (parameters[:sf] || parameters[:key])
-      sf_value = Starry.send("parse_#{ SF_FIELDS[@name] }", value)
+      sf_value = Starry.send("parse_#{ SF_FIELDS[@name] }", v)
       if parameters[:key]
         sf_value_for_key = sf_value[parameters[:key]]
         raise if sf_value_for_key.nil?
-        value = Starry.serialize(sf_value_for_key)
+        v = Starry.serialize(sf_value_for_key)
       else
-        value = Starry.serialize(sf_value)
+        v = Starry.serialize(sf_value)
       end
     end
-    unless value.ascii_only?
+    unless v.ascii_only?
       raise
     end
-    value
+    v
   end
 
   private def extract_derived_value(message)
