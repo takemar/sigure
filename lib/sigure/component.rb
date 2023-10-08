@@ -91,7 +91,7 @@ class Sigure::Component < Starry::Item
     if parameters[:req]
       message = message[:@req]
     end
-    v = message[value]
+    v = message[@name]
     if (parameters[:sf] || parameters[:key])
       sf_value = Starry.send("parse_#{ SF_FIELDS[@name] }", v)
       if parameters[:key]
