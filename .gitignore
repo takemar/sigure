@@ -1,3 +1,4 @@
 /*.gem
 /.bundle/
+/spec/examples.txt
 /vendor/bundle/
