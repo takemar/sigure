@@ -15,7 +15,7 @@ class Sigure::Verifier
     @message = message
     @options = options
     @signatures = Starry.parse_dictionary(@message['signature'])
-    @signature_input = Starry.parse_dictionary(@message['signature_input'])
+    @signature_input = Starry.parse_dictionary(@message['signature-input'])
   end
 
   def verify
@@ -23,11 +23,11 @@ class Sigure::Verifier
       return false
     end
     @signature_input.map do |label, metadata|
-      signature = @signatures[label]
+      signature = @signatures[label].value
       key = resolve_key(label)
       # algorithm = determine_algorithm(label, key)
-      algorithm = @options['algorithm']
-      signature_base = SignatureBase.new(message, metadata)
+      algorithm = @options[:algorithm]
+      signature_base = Sigure::SignatureBase.new(@message, metadata)
       algorithm.verify(signature_base, key, signature)
     end.compact.all?
   end
@@ -37,7 +37,7 @@ class Sigure::Verifier
   end
 
   def resolve_key(signature_label)
-    keyid = @signature_input[signature_label]['keyid']
+    keyid = @signature_input[signature_label].parameters['keyid']
     (@options[:key_resolver] && @options[:key_resolver][keyid]) || @options[:key] || raise
   end
 end
