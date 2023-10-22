@@ -1,3 +1,4 @@
+require 'uri'
 require 'addressable/uri'
 
 class Sigure::Component < Starry::Item
@@ -128,7 +129,12 @@ class Sigure::Component < Starry::Item
     when :@query
       "?#{ uri_of(message).query }"
     when :'@query-param'
-      raise # TODO
+      raise unless name = parameters[:name]
+      query_hash = URI.decode_www_form(uri_of(message).query).map do |n, v|
+        [URI.encode_www_form_component(n), URI.encode_www_form_component(v)]
+      end.to_h
+      raise unless query_hash.key?(name)
+      query_hash[name]
     when :@status
       message[:@status].to_s
     else
