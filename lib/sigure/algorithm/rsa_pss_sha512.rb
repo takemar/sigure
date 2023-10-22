@@ -1,5 +1,3 @@
-require 'openssl'
-
 module Sigure::Algorithm::RSA_PSS_SHA512
   def self.verify(signature_base, key, signature)
     OpenSSL::PKey.read(key).verify_pss(
