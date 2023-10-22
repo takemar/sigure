@@ -4,6 +4,11 @@ def read_key(name)
   File.read(File.expand_path("data/keys/#{ name }.pem", __dir__))
 end
 
+def read_signature_base(name)
+  path = File.expand_path("./data/signature_base/#{ name }.txt", __dir__)
+  File.read(path).gsub(/\\\n */, '').chomp
+end
+
 def read_message(name)
   hash = CICPHash.new
   path = File.expand_path("./data/messages/#{ name }.txt", __dir__)
