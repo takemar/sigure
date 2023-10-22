@@ -17,18 +17,15 @@ class Sigure::Component < Starry::Item
     end
 
     case value
-    when String
-      unless value.match?(/\A[!#$%&'*+\-.^_`|~0-9A-Za-z]*\z/)
-        raise
-      end
-      self.value = @name = value.downcase
+    when /\A[!#$%&'*+\-.^_`|~0-9A-Za-z]*\z/
+      self.value = @name = value.to_s.downcase
       @derived_component = false
     when :@target_uri, :@request_target, :@query_param
       self.value = value.to_s.replace('_', '-')
       @name = self.value.to_sym
       @derived_component = true
-    when Symbol
-      @name = value
+    when /\A@/
+      @name = value.to_sym
       self.value = value.to_s
       @derived_component = true
     else
@@ -115,29 +112,32 @@ class Sigure::Component < Starry::Item
   end
 
   private def extract_derived_value(message)
-    case parameter
+    case @name
     when :@method
       message[:@method].upcase
     when :'@target-uri'
-      uri.to_s
+      uri_of(message).to_s
     when :@authority
-      uri.authority
+      uri_of(message).authority
     when :@scheme
-      uri.scheme
+      uri_of(message).scheme
     when :'@request-target'
       raise 'Not Implemented'
     when :@path
-      uri.path
+      uri_of(message).path
     when :@query
-      "?#{ uri.query }"
+      "?#{ uri_of(message).query }"
     when :'@query-param'
       raise # TODO
     when :@status
       message[:@status].to_s
+    else
+      raise
     end
   end
 
-  private def uri
-    @uri ||= Addressable::URI.parse((message[:@req] || message)[:@url]).normalize
+  private def uri_of(message)
+    # FIXME: Performing URI parsing on each component may be undesirable for performance
+    Addressable::URI.parse((message[:@req] || message)[:@url]).normalize
   end
 end
