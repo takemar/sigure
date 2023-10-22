@@ -1,3 +1,5 @@
+require 'addressable/uri'
+
 class Sigure::Component < Starry::Item
 
   SF_FIELDS = {}
@@ -21,6 +23,10 @@ class Sigure::Component < Starry::Item
       end
       self.value = @name = value.downcase
       @derived_component = false
+    when :@target_uri, :@request_target, :@query_param
+      self.value = value.to_s.replace('_', '-')
+      @name = self.value.to_sym
+      @derived_component = true
     when Symbol
       @name = value
       self.value = value.to_s
@@ -109,6 +115,29 @@ class Sigure::Component < Starry::Item
   end
 
   private def extract_derived_value(message)
-    raise 'TODO: Not implemented'
+    case parameter
+    when :@method
+      message[:@method].upcase
+    when :'@target-uri'
+      uri.to_s
+    when :@authority
+      uri.authority
+    when :@scheme
+      uri.scheme
+    when :'@request-target'
+      raise 'Not Implemented'
+    when :@path
+      uri.path
+    when :@query
+      "?#{ uri.query }"
+    when :'@query-param'
+      raise # TODO
+    when :@status
+      message[:@status].to_s
+    end
+  end
+
+  private def uri
+    @uri ||= Addressable::URI.parse((message[:@req] || message)[:@url]).normalize
   end
 end
