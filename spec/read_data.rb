@@ -32,3 +32,16 @@ def read_request(name, scheme: 'http')
   hash[:@url] = "#{ scheme }://#{ hash['Host'] }#{ request_target }"
   hash
 end
+
+def read_response(name)
+  hash = CICPHash.new
+  path = File.expand_path("./data/responses/#{ name }.txt", __dir__)
+  request = File.read(path).gsub(/\\\n */, '').lines
+  http_version, status_code, reason_phrase = request[0].chomp.split(' ', 3)
+  hash[:@status] = status_code
+  request[1..].each do |field_line|
+    name, value = field_line.split(':', 2)
+    hash[name] = value.strip
+  end
+  hash
+end

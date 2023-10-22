@@ -64,4 +64,22 @@ RSpec.describe Sigure::SignatureBase do
     actual = Sigure::SignatureBase.new(message, signature_input.values[0]).to_s
     expect(actual).to eq(expcted)
   end
+
+  example 'Signing a Response using ecdsa-p256-sha256' do
+    name = 'signing-a-response-using-ecdsa_p256_sha256'
+    expcted = read_signature_base(name)
+    message = read_response(name)
+    signature_input = Starry.parse_dictionary(message['signature-input'])
+    actual = Sigure::SignatureBase.new(message, signature_input.values[0]).to_s
+    expect(actual).to eq(expcted)
+  end
+
+  example 'Signing a Request using hmac-sha256' do
+    name = 'signing-a-request-using-hmac_sha256'
+    expcted = read_signature_base(name)
+    message = read_request(name)
+    signature_input = Starry.parse_dictionary(message['signature-input'])
+    actual = Sigure::SignatureBase.new(message, signature_input.values[0]).to_s
+    expect(actual).to eq(expcted)
+  end
 end
