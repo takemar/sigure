@@ -13,3 +13,17 @@ def read_message(name)
   end
   hash
 end
+
+def read_request(name, scheme: 'http')
+  hash = CICPHash.new
+  path = File.expand_path("./data/requests/#{ name }.txt", __dir__)
+  request = File.read(path).gsub(/\\\n */, '').lines
+  method, request_target, http_version = request[0].chomp.split(' ', 3)
+  hash[:@method] = method
+  request[1..].each do |field_line|
+    name, value = field_line.split(':', 2)
+    hash[name] = value.strip
+  end
+  hash[:@url] = "#{ scheme }://#{ hash['Host'] }#{ request_target }"
+  hash
+end
