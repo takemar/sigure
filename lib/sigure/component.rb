@@ -41,11 +41,9 @@ class Sigure::Component < Starry::Item
       case k
       when :sf, :bs, :req, :tr
         [k, boolean_parameter(v)]
-      when :k
+      else
         raise unless v.kind_of?(String)
         [k, v]
-      else
-        raise
       end
     end.to_h.compact
     if derived_component? && (p[:sf] || p[:key] || p[:bs] || p[:tr])
