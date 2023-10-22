@@ -22,7 +22,7 @@ class Sigure::Component < Starry::Item
       self.value = @name = value.to_s.downcase
       @derived_component = false
     when :@target_uri, :@request_target, :@query_param
-      self.value = value.to_s.replace('_', '-')
+      self.value = value.to_s.gsub('_', '-')
       @name = self.value.to_sym
       @derived_component = true
     when /\A@/

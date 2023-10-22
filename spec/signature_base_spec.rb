@@ -10,6 +10,34 @@ RSpec.describe Sigure::SignatureBase do
     expect(signature_base.to_s.lines(chomp: true)).to include(expected)
   end
 
+  it 'handles query param correctly' do
+    message = CICPHash[{:@url => 'http://www.example.com/path?param=value&foo=bar&baz=batman&qux='}]
+    components = [[:@query_param, {name: 'baz'}], [:@query_param, {name: 'qux'}], [:@query_param, {name: 'param'}]]
+    signature_base_lines = Sigure::SignatureBase.new(message, components).to_s.lines(chomp: true)
+    expected = <<~'EOS'
+      "@query-param";name="baz": batman
+      "@query-param";name="qux": 
+      "@query-param";name="param": value
+    EOS
+    expected.each_line(chomp: true) do |expected_line|
+      expect(signature_base_lines).to include(expected_line)
+    end
+  end
+
+  xit 'handles query param with encoding process correctly' do
+    message = CICPHash[{:@url => 'http://www.example.com/parameters?var=this%20is%20a%20big%0Amultiline%20value&bar=with+plus+whitespace&fa%C3%A7ade%22%3A%20=something'}]
+    components = [[:@query_param, {name: 'var'}], [:@query_param, {name: 'bar'}], [:@query_param, {name: 'fa%C3%A7ade%22%3A%20'}]]
+    signature_base_lines = Sigure::SignatureBase.new(message, components).to_s.lines(chomp: true)
+    expected = <<~'EOS'
+      "@query-param";name="var": this%20is%20a%20big%0Amultiline%20value
+      "@query-param";name="bar": with%20plus%20whitespace
+      "@query-param";name="fa%C3%A7ade%22%3A%20": something
+    EOS
+    expected.each_line(chomp: true) do |expected_line|
+      expect(signature_base_lines).to include(expected_line)
+    end
+  end
+
   example 'Minimal Signature Using rsa-pss-sha512' do
     name = 'minimal-signature-using-rsa_pss_sha512'
     expcted = read_signature_base(name)
