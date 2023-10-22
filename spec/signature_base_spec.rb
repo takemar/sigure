@@ -19,6 +19,15 @@ RSpec.describe Sigure::SignatureBase do
     expect(actual).to eq(expcted)
   end
 
+  example 'Selective Covered Components using rsa-pss-sha512' do
+    name = 'selective-covered-components-using-rsa_pss_sha512'
+    expcted = read_signature_base(name)
+    message = read_request(name)
+    signature_input = Starry.parse_dictionary(message['signature-input'])
+    actual = Sigure::SignatureBase.new(message, signature_input.values[0]).to_s
+    expect(actual).to eq(expcted)
+  end
+
   example 'Full Coverage using rsa-pss-sha512' do
     name = 'full-coverage-using-rsa_pss_sha512'
     expcted = read_signature_base(name)
